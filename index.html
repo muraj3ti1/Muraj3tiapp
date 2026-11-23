@@ -1395,9 +1395,7 @@ function submit(){
  loadFb().then(function(){return mode==="up"?M.createUserWithEmailAndPassword(A,em,pw):M.signInWithEmailAndPassword(A,em,pw)}).then(done,fail)}
 /* ===== تسجيل Google داخل تطبيق الأندرويد: يُفتح في متصفح كروم ثم يعود للتطبيق (Google تمنعه داخل WebView) ===== */
 var AUTH_PAGE="https://muraj3ti1.github.io/Muraj3tiapp/auth.html",pend=null;
-function isWV(){return /; wv\)/.test(navigator.userAgent)}
-function isNative(){try{return !!(window.Capacitor&&((Capacitor.isNativePlatform&&Capacitor.isNativePlatform())||(Capacitor.getPlatform&&Capacitor.getPlatform()!=="web")))}catch(e){return false}}
-function diag(){try{var P=(window.Capacitor&&Capacitor.Plugins)||{};return "v2 | cap="+(!!window.Capacitor)+" native="+isNative()+" wv="+isWV()+" plugins="+Object.keys(P).join(",")}catch(e){return "v2 | diag-error"}}
+function isNative(){try{return !!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform())}catch(e){return false}}
 function rnd(n){var a=new Uint8Array(n);crypto.getRandomValues(a);return Array.prototype.map.call(a,function(b){return("0"+b.toString(16)).slice(-2)}).join("")}
 function sha(s){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(s)).then(function(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return("0"+x.toString(16)).slice(-2)}).join("")})}
 function setPend(v){pend=v;try{if(v)localStorage.setItem("mgpend",JSON.stringify(v));else localStorage.removeItem("mgpend")}catch(e){}}
@@ -1427,7 +1425,7 @@ function onAuthUrl(url){
 })();
 function google(){
  if(busy)return;busy=true;msg("");
- if(isNative()||isWV()){msg(diag());googleNative().catch(function(e){busy=false;msg(why(e)+" ["+diag()+"]")});return}
+ if(isNative()){googleNative().catch(fail);return}
  loadFb().then(function(){
   var p=new M.GoogleAuthProvider();p.setCustomParameters({prompt:"select_account"});
   return M.signInWithPopup(A,p).catch(function(e){
