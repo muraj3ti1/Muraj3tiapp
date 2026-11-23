@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#041029">
+<title>تسجيل الدخول — مراجعتي</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#041029;color:#eef2fb;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif}
+body{display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 50% 30%,#0b2350,#041029 70%)}
+.card{width:100%;max-width:380px;text-align:center}
+.card img{width:84px;height:84px;border-radius:20px;box-shadow:0 0 40px rgba(245,184,61,.35)}
+h1{margin:18px 0 6px;font-size:22px;color:#f5b83d}
+p{margin:0 0 18px;line-height:1.8;color:#c5d0e6}
+.btn{display:block;width:100%;padding:14px;border:0;border-radius:12px;background:#f5b83d;color:#041029;font-size:17px;font-weight:700;text-decoration:none;margin-top:10px}
+.btn.alt{background:transparent;color:#f5b83d;border:1px solid #f5b83d}
+.hide{display:none}
+.dots i{display:inline-block;width:9px;height:9px;margin:0 3px;border-radius:50%;background:#f5b83d;animation:d 1.2s infinite ease-in-out}
+.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
+@keyframes d{0%,80%,100%{opacity:.25;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
+</style>
+</head>
+<body>
+<main class="card">
+ <img src="img/icon-192.png" alt="">
+ <h1>مراجعتي</h1>
+ <p id="msg">جارٍ التحويل إلى Google…</p>
+ <div class="dots" id="dots"><i></i><i></i><i></i></div>
+ <a id="back" class="btn hide" href="#">العودة إلى التطبيق</a>
+ <a id="again" class="btn alt hide" href="#">إعادة المحاولة</a>
+</main>
+<script>
+(function(){
+/* ===== إعدادات: ضع هنا Web client ID الخاص بمشروع Firebase ===== */
+var CLIENT_ID="68198447824-gm57143bkkc7296a29co3rudfct90cke.apps.googleusercontent.com";
+/* يجب أن يطابق هذا العنوان حرفيًا «Authorized redirect URI» في Google Cloud Console */
+var REDIRECT="https://muraj3ti1.github.io/Muraj3tiapp/auth.html";
+var PKG="com.muraj3ti.murajaati";
+
+var $=function(i){return document.getElementById(i)};
+var en=/[?&]l=en\b/.test(location.search);
+var T=en?{go:"Redirecting to Google…",ret:"Signing you in…",back:"Back to the app",again:"Try again",
+ err:"Sign-in was cancelled or failed.",bad:"Invalid request. Please start again from the app.",cfg:"Google sign-in is not configured yet."}
+ :{go:"جارٍ التحويل إلى Google…",ret:"جارٍ إتمام تسجيل الدخول…",back:"العودة إلى التطبيق",again:"إعادة المحاولة",
+ err:"أُلغي تسجيل الدخول أو تعذّر إتمامه.",bad:"طلب غير صالح. ابدأ من التطبيق من جديد.",cfg:"لم يُضبط تسجيل الدخول عبر Google بعد."};
+if(en){document.documentElement.lang="en";document.documentElement.dir="ltr"}
+$("back").textContent=T.back;$("again").textContent=T.again;$("msg").textContent=T.go;
+
+function enc(s){return encodeURIComponent(s)}
+function show(id){$(id).classList.remove("hide")}
+function stop(text){$("msg").textContent=text;$("dots").classList.add("hide")}
+/* رابط يفتح تطبيقنا نحن فقط (package محدد) فلا يستطيع تطبيق آخر اعتراض الرمز */
+function appLink(qs){return "intent://auth?"+qs+"#Intent;scheme="+PKG+";package="+PKG+";end"}
+function toApp(qs){
+ var l=appLink(qs);
+ $("back").href=l;show("back");
+ try{location.href=l}catch(e){}
+}
+
+var query=new URLSearchParams(location.search);
+var frag=new URLSearchParams(location.hash.replace(/^#/,""));
+var tok=frag.get("id_token"),st=frag.get("state"),er=frag.get("error");
+
+if(tok||er){
+ /* ===== العودة من Google ===== */
+ try{history.replaceState(null,"",location.pathname)}catch(e){}   /* لا نُبقي الرمز في سجلّ المتصفح */
+ if(tok&&st){
+  stop(T.ret);
+  toApp("id_token="+enc(tok)+"&state="+enc(st));
+ }else{
+  stop(T.err);
+  toApp("error="+enc(er||"failed")+(st?"&state="+enc(st):""));
+ }
+}else{
+ /* ===== البداية: التحويل إلى Google ===== */
+ var s=query.get("s")||"",n=query.get("n")||"";
+ var ok=/^[a-f0-9]{16,128}$/.test(s)&&/^[a-f0-9]{16,128}$/.test(n);
+ if(!ok){stop(T.bad)}
+ else if(CLIENT_ID.indexOf("YOUR_")===0){stop(T.cfg)}
+ else{
+  var url="https://accounts.google.com/o/oauth2/v2/auth?client_id="+enc(CLIENT_ID)
+   +"&redirect_uri="+enc(REDIRECT)+"&response_type=id_token&scope="+enc("openid email profile")
+   +"&nonce="+enc(n)+"&state="+enc(s)+"&prompt=select_account";
+  $("again").href=url;
+  location.replace(url);
+ }
+}
+})();
+</script>
+</body>
+</html>
