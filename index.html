@@ -295,6 +295,34 @@ main:has(#t-qurani:not(.hide)){max-width:900px;padding-left:4px;padding-right:4p
 .seg button svg{display:block;margin:0 auto}
 .tj-fin{position:sticky;bottom:8px;z-index:5;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--card);border:2px solid var(--ok);border-radius:14px;padding:8px 12px;margin-top:10px;box-shadow:0 6px 20px rgba(0,0,0,.2)}
 .tj-fin.hide{display:none}.fin-ok{display:flex;align-items:center;gap:8px}
+
+/* ===== خيارات شكل صفحات المصحف (من الإعدادات) ===== */
+html[data-mp="cream"] :is(.mushaf-sheet,.mp-prev){--pg:#fffdf6;--tj-lazim:#8f0d24;--tj-wajib:#e0282d;--tj-jawaz:#e56a00;--tj-madd2:#a36b00;--tj-ghunna:#1e8a3c;--tj-gray:#8f8f8f;--tj-tafkhim:#1e3a8a;--tj-qalqala:#1f7fd0;--pink:#0b1a33;--pmut:#5a6b85;--mk-fill:#fffdf3;--mk-ink:#14451f;--gold:#b8923a;}
+html[data-mp="white"] :is(.mushaf-sheet,.mp-prev){--pg:#ffffff;--tj-lazim:#8f0d24;--tj-wajib:#e0282d;--tj-jawaz:#e56a00;--tj-madd2:#a36b00;--tj-ghunna:#1e8a3c;--tj-gray:#8f8f8f;--tj-tafkhim:#1e3a8a;--tj-qalqala:#1f7fd0;--pink:#0b1a33;--pmut:#5a6b85;--mk-fill:#fffdf3;--mk-ink:#14451f;--gold:#b8923a;}
+html[data-mp="sand"] :is(.mushaf-sheet,.mp-prev){--pg:#f3e6c8;--tj-lazim:#8f0d24;--tj-wajib:#e0282d;--tj-jawaz:#e56a00;--tj-madd2:#a36b00;--tj-ghunna:#1e8a3c;--tj-gray:#8f8f8f;--tj-tafkhim:#1e3a8a;--tj-qalqala:#1f7fd0;--pink:#0b1a33;--pmut:#5a6b85;--mk-fill:#fffdf3;--mk-ink:#14451f;--gold:#b8923a;}
+html[data-mp="mint"] :is(.mushaf-sheet,.mp-prev){--pg:#e6f2e3;--tj-lazim:#8f0d24;--tj-wajib:#e0282d;--tj-jawaz:#e56a00;--tj-madd2:#a36b00;--tj-ghunna:#1e8a3c;--tj-gray:#8f8f8f;--tj-tafkhim:#1e3a8a;--tj-qalqala:#1f7fd0;--pink:#0b1a33;--pmut:#5a6b85;--mk-fill:#fffdf3;--mk-ink:#14451f;--gold:#b8923a;}
+html[data-mp="gray"] :is(.mushaf-sheet,.mp-prev){--pg:#e9edf2;--tj-lazim:#8f0d24;--tj-wajib:#e0282d;--tj-jawaz:#e56a00;--tj-madd2:#a36b00;--tj-ghunna:#1e8a3c;--tj-gray:#8f8f8f;--tj-tafkhim:#1e3a8a;--tj-qalqala:#1f7fd0;--pink:#0b1a33;--pmut:#5a6b85;--mk-fill:#fffdf3;--mk-ink:#14451f;--gold:#b8923a;}
+html[data-mp="night"] :is(.mushaf-sheet,.mp-prev){--pg:#0b1b3a;--tj-lazim:#ff4d6d;--tj-wajib:#ff7a45;--tj-jawaz:#ffa31a;--tj-madd2:#ffd84d;--tj-ghunna:#55e07a;--tj-gray:#8e97a8;--tj-tafkhim:#8fb0ff;--tj-qalqala:#5cc4ff;--pink:#eaf1ff;--pmut:#9db0d0;--mk-fill:#12301f;--mk-ink:#d7f5df;--gold:#d3b15d;}
+html[data-mp="black"] :is(.mushaf-sheet,.mp-prev){--pg:#000000;--tj-lazim:#ff4d6d;--tj-wajib:#ff7a45;--tj-jawaz:#ffa31a;--tj-madd2:#ffd84d;--tj-ghunna:#55e07a;--tj-gray:#8e97a8;--tj-tafkhim:#8fb0ff;--tj-qalqala:#5cc4ff;--pink:#eaf1ff;--pmut:#9db0d0;--mk-fill:#12301f;--mk-ink:#d7f5df;--gold:#d3b15d;}
+html[data-mp] :is(.mushaf-text,.mushaf-foot,.mushaf-head,.sura-ban,.mp-t){--ink:var(--pink);--mut:var(--pmut)}
+html[data-mf="green"] :is(.mushaf-sheet,.mp-prev){--pgline:#3f9a5f}
+html[data-mf="gold"] :is(.mushaf-sheet,.mp-prev){--pgline:#c9a24a}
+html[data-mf="blue"] :is(.mushaf-sheet,.mp-prev){--pgline:#4a7fd4}
+html[data-mf="brown"] :is(.mushaf-sheet,.mp-prev){--pgline:#a56a2e}
+html[data-mf="none"] :is(.mushaf-frame,.mp-fr){border-color:transparent;box-shadow:none}
+html[data-ms="md"] .mushaf-text{padding-inline:7%}
+html[data-ms="sm"] .mushaf-text{padding-inline:14%}
+html[data-ml="tight"] .mushaf-text .qline{height:1.7em}
+html[data-ml="loose"] .mushaf-text .qline{height:2.3em}
+.mp-grid{display:flex;flex-wrap:wrap;gap:8px}
+.mp-sw{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 4px;flex:1 1 62px;min-width:62px;font-size:12px;line-height:1.5}
+.mp-sw i{display:block;width:32px;height:32px;border-radius:50%;border:2px solid var(--line)}
+.mp-sw[aria-pressed=true]{border-color:var(--acc);background:var(--acc2);box-shadow:0 0 0 2px var(--acc);font-weight:600}
+.mp-sub{font-size:13px;color:var(--mut);margin:10px 0 4px;font-weight:600}
+.mp-prev{margin-top:10px;background:var(--pg);border:1px solid var(--line);border-radius:12px;padding:6px}
+.mp-fr{border:2px solid var(--pgline);border-radius:10px;padding:8px 10px;box-shadow:inset 0 0 0 3px var(--pg),inset 0 0 0 4.5px var(--pgline);text-align:center}
+.mp-t{direction:rtl;color:var(--ink);font-family:'Amiri Quran','Amiri',serif;font-size:24px;line-height:2.1}
+.mp-t small{display:block;font:600 12px/1.5 Cairo,Tahoma,sans-serif;color:var(--mut)}
 </style></head>
 <body>
 <section id="intro">
@@ -999,7 +1027,7 @@ function qFit(){
 new ResizeObserver(function(){var b=$("mushafText");if(b&&b.clientWidth&&Math.abs(b.clientWidth-QW_LAST)>1)qFit()}).observe($("mushafSheet"));
 /* ألوان التجويد من لوحة ألوان الخط، منسّقة مع ألوان التطبيق، فتتبدّل مع المظهر الفاتح والداكن */
 function tjPalette(){
- var rs=getComputedStyle(document.documentElement),dark=rs.colorScheme.indexOf("dark")>=0,ink=getComputedStyle(document.body).color,
+ var rs=getComputedStyle($("mushafText")||document.documentElement),dark=rs.colorScheme.indexOf("dark")>=0,ink=rs.getPropertyValue("--ink").trim(),
      mut=rs.getPropertyValue("--mut").trim(),map={0:ink},r,i;
  for(r in TJ_PALIDX){
   var col=rs.getPropertyValue("--tj-"+r).trim();
@@ -1332,6 +1360,51 @@ var _c=window.confirm;window.confirm=function(m){return _c(T(m))};
 TJ_RULES.forEach(function(r){var e=D[r.name];if(e)r.name=e});
 document.title=T(document.title);tn(document.body);mo.observe(document.body,O);
 })();
+
+/* ===== شكل صفحات المصحف: خيارات في الإعدادات ===== */
+(function(){
+var KEY='mpref',EN=LANG==='en',P={p:'',f:'',s:'',l:''},
+ OK={p:['cream','white','sand','mint','gray','night','black'],f:['green','gold','blue','brown','none'],s:['md','sm'],l:['tight','loose']},
+ AT={p:'data-mp',f:'data-mf',s:'data-ms',l:'data-ml'},R=document.documentElement;
+try{var r=JSON.parse(localStorage.getItem(KEY)||'{}');for(var k in OK)if(OK[k].indexOf(r[k])>=0)P[k]=r[k]}catch(e){}
+function apply(re){
+ for(var k in AT){if(P[k])R.setAttribute(AT[k],P[k]);else R.removeAttribute(AT[k])}
+ if(re){try{tjPalette()}catch(e){}try{qFit()}catch(e){}}
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(P))}catch(e){}}
+apply(false);
+var L=function(a,e){return EN?e:a};
+var PP=[['',L('تلقائي','Auto'),'linear-gradient(135deg,#fffdf6 50%,#0b1b3a 50%)'],['cream',L('ورقي','Cream'),'#fffdf6'],['white',L('أبيض','White'),'#ffffff'],['sand',L('بيج','Sand'),'#f3e6c8'],['mint',L('أخضر فاتح','Mint'),'#e6f2e3'],['gray',L('رمادي','Gray'),'#e9edf2'],['night',L('ليلي','Night'),'#0b1b3a'],['black',L('أسود','Black'),'#000000']];
+var FF=[['',L('تلقائي','Auto'),'#2f7d4a'],['green',L('أخضر','Green'),'#3f9a5f'],['gold',L('ذهبي','Gold'),'#c9a24a'],['blue',L('أزرق','Blue'),'#4a7fd4'],['brown',L('بني','Brown'),'#a56a2e'],['none',L('بدون','None'),'transparent']];
+var SS=[['',L('كبير','Large')],['md',L('متوسط','Medium')],['sm',L('صغير','Small')]];
+var LL=[['tight',L('متقارب','Tight')],['',L('عادي','Normal')],['loose',L('متباعد','Loose')]];
+var sec=document.createElement('div');sec.className='stg-sec nt';sec.id='mpSec';
+sec.innerHTML='<label>'+L('شكل صفحات المصحف','Mushaf page style')+'</label>'
++'<div class="mp-sub">'+L('لون الصفحة','Page colour')+'</div><div class="mp-grid" data-k="p">'
++PP.map(function(o){return '<button type="button" class="mp-sw" data-v="'+o[0]+'"><i style="background:'+o[2]+'"></i>'+o[1]+'</button>'}).join('')+'</div>'
++'<div class="mp-sub">'+L('لون الإطار','Frame colour')+'</div><div class="mp-grid" data-k="f">'
++FF.map(function(o){return '<button type="button" class="mp-sw" data-v="'+o[0]+'"><i style="background:var(--card);border:4px solid '+o[2]+'"></i>'+o[1]+'</button>'}).join('')+'</div>'
++'<div class="mp-sub">'+L('حجم الخط','Text size')+'</div><div class="seg" data-k="s">'
++SS.map(function(o){return '<button type="button" data-v="'+o[0]+'">'+o[1]+'</button>'}).join('')+'</div>'
++'<div class="mp-sub">'+L('تباعد الأسطر','Line spacing')+'</div><div class="seg" data-k="l">'
++LL.map(function(o){return '<button type="button" data-v="'+o[0]+'">'+o[1]+'</button>'}).join('')+'</div>'
++'<div class="mushaf-sheet mp-prev" aria-hidden="true"><div class="mp-fr"><div class="mp-t"><small>'+L('معاينة','Preview')+'</small>'
++'بِسْمِ ٱللَّهِ <span style="color:var(--tj-lazim)">ٱلرَّحْمَٰنِ</span> <span style="color:var(--tj-ghunna)">ٱلرَّحِيمِ</span></div></div></div>'
++'<button type="button" id="mpReset" style="width:100%;margin-top:10px">'+L('استعادة الشكل الافتراضي','Reset to default')+'</button>';
+var anchor=$('stgLang').parentNode;anchor.parentNode.insertBefore(sec,anchor);
+function paint(){
+ [].forEach.call(sec.querySelectorAll('[data-k]'),function(g){var k=g.getAttribute('data-k');
+  [].forEach.call(g.children,function(b){b.setAttribute('aria-pressed',b.getAttribute('data-v')===P[k])})})
+}
+sec.addEventListener('click',function(e){
+ var b=e.target.closest('button');if(!b||!sec.contains(b))return;
+ if(b.id==='mpReset'){P={p:'',f:'',s:'',l:''}}
+ else{var g=b.parentNode,k=g.getAttribute('data-k');if(!k)return;P[k]=b.getAttribute('data-v')}
+ save();apply(true);paint();
+});
+paint();
+})();
+
 
 </script>
 
