@@ -9,7 +9,7 @@ var EXT = ["fonts.googleapis.com", "fonts.gstatic.com", "cdnjs.cloudflare.com", 
 
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) {
-    return Promise.all(["./", "manifest.json", "robot.js?v=4", "musammi.js?v=25", "data/quran-text.json"].map(function (u) { return c.add(u).catch(function () {}); }));
+    return Promise.all(["./", "manifest.json", "robot.js?v=4", "musammi.js?v=25", "apkupdate.js?v=1", "data/quran-text.json"].map(function (u) { return c.add(u).catch(function () {}); }));
   }));
 });
 
