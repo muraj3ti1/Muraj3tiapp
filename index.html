@@ -293,8 +293,15 @@ main:has(#t-qurani:not(.hide)){max-width:900px;padding-left:4px;padding-right:4p
 @media(prefers-reduced-motion:reduce){.chb,.ring,.spk{animation:none}}
 .exs{display:flex;gap:12px;align-items:center;margin:12px 0}.exs svg{flex:none}.exs p{margin:2px 0 0}
 .seg button svg{display:block;margin:0 auto}
-.tj-fin{position:sticky;bottom:8px;z-index:5;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--card);border:2px solid var(--ok);border-radius:14px;padding:8px 12px;margin-top:10px;box-shadow:0 6px 20px rgba(0,0,0,.2)}
-.tj-fin.hide{display:none}.fin-ok{display:flex;align-items:center;gap:8px}
+.tj-fin{position:fixed;left:10px;right:10px;margin:0 auto;max-width:560px;box-sizing:border-box;-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0);bottom:calc(var(--vvb,0px) + env(safe-area-inset-bottom,0px) + 10px);z-index:45;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--card);border:2px solid var(--ok);border-radius:14px;padding:8px 12px;box-shadow:0 6px 20px rgba(0,0,0,.28)}
+#t-qurani{padding-bottom:150px}
+/* شريط «أنهيت…»: حجم وموضع ثابتان في كل الحالات، فلا يقفز عند تقليب الصفحات */
+.tj-fin{height:76px;flex-wrap:nowrap;overflow:hidden;gap:8px;padding:6px 10px}
+.tj-fin>span:first-child,.tj-fin .fin-ok>span{flex:1 1 0;min-width:0;font-size:13px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tj-fin .fin-ok{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:6px}.tj-fin .fin-ok svg{width:36px;height:36px;flex:none}
+.tj-fin button{flex:none;padding:8px 12px;font-size:13px;white-space:nowrap}.tj-fin .row{display:flex;gap:6px;flex:none}
+.tj-fin>span:first-child{flex:1 1 140px;min-width:0;font-size:14px}.tj-fin>button{flex:none}
+.tj-fin.hide,.tj-fin.off{display:none}.fin-ok{display:flex;align-items:center;gap:8px}
 
 /* ===== خيارات شكل صفحات المصحف (من الإعدادات) ===== */
 html[data-mp="cream"] :is(.mushaf-sheet,.mp-prev){--pg:#fffdf6;--tj-lazim:#8f0d24;--tj-wajib:#e0282d;--tj-jawaz:#e56a00;--tj-madd2:#a36b00;--tj-ghunna:#1e8a3c;--tj-gray:#8f8f8f;--tj-tafkhim:#1e3a8a;--tj-qalqala:#1f7fd0;--pink:#0b1a33;--pmut:#5a6b85;--mk-fill:#fffdf3;--mk-ink:#14451f;--gold:#b8923a;}
@@ -374,12 +381,12 @@ html[data-ml="loose"] .mushaf-text .qline{height:2.3em}
  <nav role="tablist">
   <button role="tab" data-t="today" aria-selected="true">اليوم</button>
    <button role="tab" data-t="map" aria-selected="false">خريطتي</button>
-  <button role="tab" data-t="week" aria-selected="false">الأسبوع</button>
   <button role="tab" data-t="qurani" aria-selected="false">قرآني</button>
   <button role="tab" data-t="how" aria-selected="false">الطريقة</button>
  </nav>
 
  <section id="t-today" class="">
+  <div class="card rg" id="robotGreet"></div>
   <div class="card">
    <div class="stats">
     <div><b id="sN">٢١</b><span>صفحة محفوظة</span></div>
@@ -1308,14 +1315,14 @@ function renderMap(){if(!S)return;
   +'<h2 style="margin-top:12px">متى تظهر ✓ على اليوم؟</h2><p style="margin:0">'+G("حين تنتهي من كل أقسام يومك: الحفظ الجديد والمراجعة (والقريبة إن وُجدت). التطبيق يعرف القسم من الصفحة التي تقرؤها، فاضغط «أنهيت…» في المصحف وسيعلّم الخريطة، وإن أخطأت فاضغط «إلغاء».","حين تنتهين من كل أقسام يومك: الحفظ الجديد والمراجعة (والقريبة إن وُجدت). التطبيق يعرف القسم من الصفحة التي تقرئينها، فاضغطي «أنهيت…» في المصحف وسيعلّم الخريطة، وإن أخطأتِ فاضغطي «إلغاء».")+'</p></div>'}
 $("t-map").addEventListener("click",function(e){var b=e.target.closest("button");if(!b||!S)return;
  if(b.dataset.w){mapOff=Math.min(0,mapOff+ +b.dataset.w);var f=Math.floor(mapNow().ti/7);if(f+mapOff<0)mapOff=-f;renderMap()}
- else if(b.dataset.ch){S.ch=b.dataset.ch;save();renderMap();finRefresh()}
+ else if(b.dataset.ch){S.ch=b.dataset.ch;save();renderMap();finRefresh();try{MRobot.refresh()}catch(e){}}
  else if(b.dataset.rd){var a=b.dataset.rd.split(",");tjGoTask(+a[0],+a[1],a[2])}});
 /* زر «أنهيت…» داخل المصحف: يحسب القسم من الصفحة، ويمكن تسجيله وإلغاؤه (والتسميع اختياري) */
 function finSection(){var n=tjState.pg,m=tjState.mode,dn=S.log[dkey(new Date())]||{},pr=dn.pr||{},id;
  for(id in pr){if(dn[id]&&n>=pr[id][0]&&n<=pr[id][1]&&(m==="study"||id!=="new"))return {id:id,t:pr[id][2],lo:pr[id][0],hi:pr[id][1]}}
  var c=(TK||[]).filter(function(t){return n>=t.lo&&n<=t.hi})[0];return c?{id:c.id,t:c.t,lo:c.lo,hi:c.hi}:null}
-function finRefresh(){var b=$("tjFin");if(!b||!S)return;var m=tjState.mode,t=finSection();
- if(!t){b.classList.add("hide");return}
+function finRefresh(){var b=$("tjFin");if(!b||!S)return;if(b.parentNode!==document.body)document.body.appendChild(b);b.classList.toggle("off",tab!=="qurani");var m=tjState.mode,t=finSection();
+ if(!t){var m0=tjState.mode,l0={study:"أنهيت حفظي",review:"أنهيت مراجعتي",tasmee:"أنهيت تسميعي"}[m0]||"أنهيت";b.innerHTML='<span>هذه الصفحة ليست ضمن مهام اليوم</span><button class="p" id="tjFinNone" disabled>'+l0+'</button>';b.classList.remove("hide");return}
  var dn=S.log[dkey(new Date())]||{},ts=m==="tasmee",on=ts?!!(dn.ts&&dn.ts[t.id]):!!dn[t.id],k=S.ch||"boy",
   lab={study:"أنهيت حفظي",review:"أنهيت مراجعتي",tasmee:"أنهيت تسميعي"}[m]||"أنهيت";
  b.innerHTML=on?'<div class="fin-ok">'+chrS(k,dn.all&&!ts?"cheer":"read",44)+'<span>✓ '+(ts?GN("سمّعتَ","سمّعتِ")+" «"+t.t+"»":"سُجّل «"+t.t+"»"+(dn.all?GN(" — وأنهيتَ يومك كاملًا 🎉"," — وأنهيتِ يومك كاملًا 🎉"):""))+'</span></div><span class="row" style="margin:0"><button id="tjFinUndo">إلغاء</button><button class="p" id="tjMapGo">افتح خريطتي</button></span>'
@@ -1331,6 +1338,13 @@ $("tjFin").addEventListener("click",function(e){var q=e.target.closest("button")
 var _r0=render;render=function(){_r0();if(tab==="map")renderMap();finRefresh()};
 var _a0=tjApplyView;tjApplyView=function(){var r=_a0.apply(this,arguments);finRefresh();return r};
 var _b0=tjRenderPage;tjRenderPage=function(){var r=_b0.apply(this,arguments);finRefresh();return r};
+document.querySelector("nav").addEventListener("click",function(){setTimeout(finRefresh,0)});
+/* تثبيت الشريط والزر العائم على حافة الشاشة المرئية فعلًا: في iPhone يتحرك شريط المتصفح السفلي أثناء التمرير فتبدو العناصر السفلية كأنها تتحرك */
+(function(){var v=window.visualViewport,q=0;
+ function pin(){q=0;var d=0;if(v)d=Math.max(0,window.innerHeight-(v.offsetTop+v.height));document.documentElement.style.setProperty("--vvb",Math.round(d)+"px")}
+ function sched(){if(!q)q=requestAnimationFrame(pin)}
+ if(v){v.addEventListener("resize",sched);v.addEventListener("scroll",sched)}
+ window.addEventListener("scroll",sched,{passive:true});window.addEventListener("orientationchange",sched);pin()})();
 
 /* ===== الإعدادات + الإنجليزية ===== */
 (function(){
@@ -1590,11 +1604,14 @@ function saveP(){try{localStorage.setItem(KEY(),JSON.stringify(P))}catch(e){}}
 function left(k){return Math.max(0,MAXC-((P.c&&P.c[k])||0))}
 function view(){return stage?Object.assign({},P,{av:stage}):P}
 function chKey(){return P&&P.g==="f"?"girl":"boy"}
+window.MPROFILE=function(){return P?{g:P.g,n:P.n}:null};
 function syncCh(){if(!P)return;var c=chKey();if(typeof S!=="undefined"&&S&&S.ch!==c){S.ch=c;try{save()}catch(e){}try{render()}catch(e){}}}
 function btn(){
  var b=g("accBtn");if(!b)return;
  if(P&&uid){b.innerHTML=avHTML(P,40);b.classList.add("has-av");b.setAttribute("aria-label",P.n);b.title=P.n}
- else{b.textContent="👤";b.classList.remove("has-av");b.setAttribute("aria-label","الحساب");b.removeAttribute("title")}}
+ else{b.textContent="👤";b.classList.remove("has-av");b.setAttribute("aria-label","الحساب");b.removeAttribute("title")}
+ try{window.MRobot&&MRobot.greet()}catch(e){}
+ try{window.MRobot&&MRobot.ask()}catch(e){}}
 
 /* ---------- التسجيل الأول: الاسم والعمر والجنس ---------- */
 function onbErr(t){var e=g("onbErr");e.textContent=t;e.classList.toggle("hide",!t)}
@@ -1614,6 +1631,8 @@ function onbGo(){
  P={n:n,a:a,g:gSel,av:gSel==="f"?"g1":"b1",bg:1,pt:0,fr:0,fl:0,c:{n:0,p:0},t:Date.now()};
  saveP();closeOnb();syncCh();btn()}
 
+var RDEF="المسمّع الآلي";
+
 /* ---------- نافذة حسابي ---------- */
 function acMsg(t,good){var e=g("acMsg");if(!e)return;e.textContent=t;e.classList.toggle("hide",!t);e.classList.toggle("ok",!!good)}
 function counter(k,label){var l=left(k);return '<p class="sub ac-left"><span>'+label+'</span> <b class="nt">'+num(l)+'</b> <span class="nt">/ '+num(MAXC)+'</span></p>'}
@@ -1625,6 +1644,8 @@ function pProf(){
  +'<button type="button" class="p" id="acSaveN"'+(l?'':' disabled')+'>حفظ الاسم</button>'
  +'<label for="acA">العمر</label><input id="acA" class="fld" type="number" inputmode="numeric" min="4" max="99" value="'+P.a+'">'
  +'<div class="row"><button type="button" id="acSaveA">حفظ العمر</button></div>'
+ +'<label for="acR">اسم الروبوت</label><input id="acR" class="fld" maxlength="20" placeholder="'+RDEF+'" value="'+esc((window.MRobot&&MRobot.custom(P.g))||"")+'">'
+ +'<div class="row"><button type="button" id="acSaveR">حفظ اسم الروبوت</button></div>'
  +'<p id="acMsg" class="auth-err hide" role="alert"></p>'
  +'<p class="sub" style="margin-top:14px"><span>شخصيتك في التطبيق:</span> <b>'+AV[P.g==="f"?"g1":"b1"].n+'</b></p>'}
 function pPic(){
@@ -1675,6 +1696,10 @@ g("acct").addEventListener("click",function(e){
   var a=parseInt(g("acA").value,10);
   if(!(a>=4&&a<=99)){acMsg("أدخل عمرًا صحيحًا بين 4 و99");return}
   P.a=a;saveP();paint();acMsg("تم حفظ العمر",true);return}
+ if(b.id==="acSaveR"){
+  var rn=g("acR").value.replace(/\s+/g," ").trim();
+  if(rn&&rn.length<2){acMsg("الاسم حرفان على الأقل");return}
+  try{MRobot.setName(P.g,rn)}catch(e){}acMsg(rn?"تم حفظ اسم الروبوت":"عاد الاسم إلى «"+RDEF+"»",true);return}
  if(b.id==="acReset"){
   MAUTH.reset(MAUTH.email()).then(function(){acMsg("أُرسل رابط إعادة تعيين كلمة المرور إلى بريدك",true)},function(){acMsg("تعذّر الإرسال، أعد المحاولة")});return}
  if(b.id==="acLogout"){MAUTH.logout().catch(function(){})}});
@@ -1709,7 +1734,7 @@ window.MPROF={
 (function(){
 if(!("serviceWorker" in navigator)||location.protocol==="file:")return;
 var had=!!navigator.serviceWorker.controller,rl=false,g=function(i){return document.getElementById(i)};
-function show(w){var b=g("updBar");b.classList.remove("hide");g("updGo").onclick=function(){w.postMessage({type:"SKIP_WAITING"})};g("updX").onclick=function(){b.classList.add("hide")}}
+function show(w){var b=g("updBar");b.classList.remove("hide");setTimeout(function(){b.classList.add("hide")},5000);g("updGo").onclick=function(){w.postMessage({type:"SKIP_WAITING"})};g("updX").onclick=function(){b.classList.add("hide")}}
 navigator.serviceWorker.addEventListener("controllerchange",function(){if(!had||rl)return;rl=true;location.reload()});
 navigator.serviceWorker.register("sw.js").then(function(reg){
  if(reg.waiting&&navigator.serviceWorker.controller)show(reg.waiting);
@@ -1780,7 +1805,7 @@ function due(){
 }
 setTimeout(function(){
  if(!navigator.onLine||!due()||!g("updBar").classList.contains("hide"))return;
- refresh().then(function(c){if(c>=N){set("done");return}ask.classList.remove("hide")});
+ refresh().then(function(c){if(c>=N){set("done");return}ask.classList.remove("hide");setTimeout(function(){if(!run&&get()!=="started")hide()},9000)});
 },4000);
 })();
 function open(){refresh()}
@@ -1788,4 +1813,6 @@ g("setBtn").addEventListener("click",open);g("setBtn2").addEventListener("click"
 })();
 </script>
 
+<script src="robot.js?v=4"></script>
+<script src="musammi.js?v=24"></script>
 </body></html>
