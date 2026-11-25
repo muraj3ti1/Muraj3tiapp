@@ -1839,16 +1839,16 @@ g("igGo").onclick=function(){close();go()};
 g("igLater").onclick=close;
 m.addEventListener("click",function(e){if(e.target===m)close()});
 if(seen())return;
-function busy(){return !!document.querySelector('.tjg:not(.hide):not(#igMsg),[role="dialog"]:not(.hide):not([hidden]):not(#igMsg)')}
-var tm=setInterval(function(){
+function busy(){return !!document.querySelector('.tjg:not(.hide):not(#igMsg),[role="dialog"]:not(.hide):not([hidden]):not(#igMsg),.ua')}
+var tm;setTimeout(function(){tm=setInterval(function(){
  if(shown||seen()){clearInterval(tm);return}
  if(busy())return;
  shown=true;clearInterval(tm);mark();m.classList.remove("hide");
-},2000);
+},2000)},9000);
 })();
 </script>
 <script src="robot.js?v=4"></script>
 <script src="musammi.js?v=25"></script>
-<script src="apkupdate.js?v=2"></script>
+<script src="apkupdate.js?v=3"></script>
 <script src="backup.js?v=1"></script>
 </body></html>

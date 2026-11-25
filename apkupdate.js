@@ -1,16 +1,15 @@
 /* تنبيه تحديث تطبيق الأندرويد (APK): يظهر داخل التطبيق فقط عندما يتوفر إصدار أحدث.
    يقرأ apk-version.json من الموقع ويقارن رقم البناء بالمثبّت على الهاتف.
-   المستخدم يختار: تنزيل التحديث (بعد تأكيد أنه سجّل الدخول لحفظ بياناته) أو المتابعة بدون المسمّع.
-   يكتب مفتاحًا واحدًا جديدًا فقط (mapkskip) لتذكّر «المتابعة بدون»، ولا يمس أي بيانات للمستخدم. */
+   تظهر الرسالة في كل مرة يُفتح فيها التطبيق ما دام الإصدار المثبّت أقدم من المنشور.
+   المستخدم يختار: تنزيل التحديث (بعد تأكيد أنه سجّل الدخول لحفظ بياناته) أو المتابعة بدون المسمّع (تُغلق الرسالة حتى فتح التطبيق مرة أخرى).
+   لا يكتب أي مفتاح في التخزين ولا يمس أي بيانات للمستخدم. */
 (function (G) {
   "use strict";
   var VER_URL = "https://muraj3ti1.github.io/Muraj3tiapp/apk-version.json";
-  var SKIP_KEY = "mapkskip", SKIP_DAYS = 3;
   function native() { try { return !!(G.Capacitor && G.Capacitor.isNativePlatform && G.Capacitor.isNativePlatform()); } catch (e) { return false; } }
   if (!G.document || !native()) return;
   function plug(n) { try { return (G.Capacitor.Plugins && G.Capacitor.Plugins[n]) || null; } catch (e) { return null; } }
   function ls(k) { try { return G.localStorage.getItem(k); } catch (e) { return null; } }
-  function lsSet(k, v) { try { G.localStorage.setItem(k, v); } catch (e) {} }
 
   var bar = null, hidden = false;
   var CSS = ".ua{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);transform:translateX(-50%);width:min(460px,calc(100% - 20px));max-height:85vh;overflow:auto;box-sizing:border-box;z-index:300;background:var(--card,#0f1d3d);color:var(--ink,#fff);border:2px solid var(--acc,#3f7cf0);border-radius:18px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.35);direction:rtl;font-family:inherit}" +
@@ -26,7 +25,6 @@
     try { G.location.href = url; } catch (e) {}
   }
   function hide() { hidden = true; if (bar) { bar.remove(); bar = null; } }
-  function skipped() { var t = parseInt(ls(SKIP_KEY), 10); return t > 0 && (Date.now() - t) < SKIP_DAYS * 864e5; }
   function el(tag, txt, cls) { var e = document.createElement(tag); if (txt) e.textContent = txt; if (cls) e.className = cls; return e; }
 
   function show(r) {
@@ -48,12 +46,12 @@
     var no = el("button", "متابعة بدون المسمّع"); no.type = "button";
     cb.onchange = function () { go.disabled = !cb.checked; };
     go.onclick = function () { if (cb.checked) download(r.url); };
-    no.onclick = function () { lsSet(SKIP_KEY, String(Date.now())); hide(); };
+    no.onclick = hide;
     row.appendChild(go); row.appendChild(no); bar.appendChild(row);
     document.body.appendChild(bar);
   }
   function check() {
-    var App = plug("App"); if (bar || hidden || skipped() || !App || !App.getInfo || !G.fetch) return;
+    var App = plug("App"); if (bar || hidden || !App || !App.getInfo || !G.fetch) return;
     Promise.all([
       App.getInfo(),
       G.fetch(VER_URL + "?t=" + Date.now(), { cache: "no-store" }).then(function (x) { return x.ok ? x.json() : null; })
