@@ -410,7 +410,55 @@
   /* المحرك: تعرّف المتصفح الصوتي عبر الإنترنت فقط */
   var NOSR = "هذا المتصفح لا يدعم التعرّف الصوتي. استخدم Chrome أو Edge أو Safari.";
   var NONET = "التسميع الآلي يحتاج إلى اتصال بالإنترنت. اتصل بالإنترنت ثم أعد المحاولة.";
+  /* تطبيق الأندرويد (Capacitor): واجهة الويب للتعرّف الصوتي لا تعمل داخل WebView، فنستخدم مكوّن التعرّف الأصلي */
+  function nativeSR() {
+    try {
+      var C = G.Capacitor;
+      if (!(C && C.isNativePlatform && C.isNativePlatform())) return null;
+      return (C.Plugins && C.Plugins.SpeechRecognition) || null;
+    } catch (e) { return null; }
+  }
+  function nativeEngine(P) {
+    var hs = [], last = "", alive = false, wd = null, fast = 0, t0 = 0;
+    function clean() { clearTimeout(wd); hs.forEach(function (h) { try { h.remove(); } catch (e) {} }); hs = []; }
+    return {
+      start: function (cb, onEnd) {
+        var ended = false; alive = true; last = ""; t0 = Date.now();
+        function fin(err) {
+          if (ended) return; ended = true; clean();
+          if (!err && last && alive) { var t = last; last = ""; cb(t, true); }
+          if (Date.now() - t0 < 800) fast++; else fast = 0;
+          if (!err && fast >= 4) err = "service-not-allowed";   /* فشل متكرر فوري: لا نعيد المحاولة إلى ما لا نهاية */
+          onEnd(err);
+        }
+        function arm() { clearTimeout(wd); wd = setTimeout(function () { try { P.stop(); } catch (e) {} fin(); }, 9000); }
+        Promise.resolve(P.checkPermissions()).then(function (p) {
+          if (p && p.speechRecognition === "granted") return p;
+          return P.requestPermissions();
+        }).then(function (p) {
+          if (!p || p.speechRecognition !== "granted") throw new Error("not-allowed");
+          return Promise.all([
+            P.addListener("partialResults", function (d) {
+              var m = d && d.matches; if (!m || !m[0] || !alive) return;
+              last = m[0]; cb(last, false); arm();
+            }),
+            P.addListener("listeningState", function (d) { if (d && d.status === "stopped") fin(); })
+          ]);
+        }).then(function (h) {
+          hs = h; arm();
+          return P.start({ language: "ar-SA", maxResults: 3, partialResults: true, popup: false });
+        }).then(function (r) {
+          if (r && r.matches && r.matches[0]) { last = r.matches[0]; fin(); }
+        }).catch(function (e) {
+          var m = String((e && e.message) || e);
+          fin(/permission|not-allowed|denied/i.test(m) ? "not-allowed" : (/network|connect/i.test(m) ? "network" : "aborted"));
+        });
+      },
+      stop: function () { alive = false; clean(); try { P.stop(); } catch (e) {} }
+    };
+  }
   function engine() {
+    var NP = nativeSR(); if (NP) return nativeEngine(NP);
     var SR = G.SpeechRecognition || G.webkitSpeechRecognition; if (!SR) return null;
     var r = new SR(); r.lang = "ar-SA"; r.continuous = true; r.interimResults = true; r.maxAlternatives = 3;
     try { if ("processLocally" in r) r.processLocally = false; } catch (e) {}
