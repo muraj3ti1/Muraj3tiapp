@@ -284,18 +284,99 @@
   function bsmAt(T, j) { return T.length - j >= 4 && BW.every(function (w, i) { return sk(T[j + i]) === sk(w); }); }
   function pageHasBsm() { return W.some(function (w) { return w.k === "1:1"; }); }
 
-  /* القفل: أول كلمتين صحيحتين (أو كلمة فريدة طويلة) تحدّدان موضع القارئ في الصفحة، أيًّا كان */
-  function tryLock(T, stable) {
-    var Ts = T.slice(0, st.j + stable), best = null, uniq = [], s, p, r;
-    for (s = st.j; s < Math.min(Ts.length, st.j + 3); s++) {
-      best = null; uniq = [];
-      for (p = 0; p < W.length; p++) {
-        r = seq(p, Ts, s, 3); if (!r.m) continue;
-        if (r.m >= 2) { if (!best || r.m > best.m) best = { m: r.m, p: p, q: r.q, j: r.j }; }
-        else uniq.push({ m: 1, p: p, q: r.q, j: r.j });
+  /* ===== البحث في المصحف كله =====
+     إن قرأ القارئ من صفحة بعيدة عن الصفحة المفتوحة (لا تطابقها كلماته) نبحث عنه في المصحف كله وننتقل إلى صفحته تلقائيًا.
+     لا يعمل إلا حين يفشل التحديد داخل الصفحة الحالية، فلا يمسّ سرعة التعرّف ولا دقته في الحالة العادية. */
+  var GX = null;
+  var ARD = function (n) { return String(n).replace(/\d/g, function (d) { return "٠١٢٣٤٥٦٧٨٩"[d]; }); };
+  function buildIndex() {
+    if (GX) return GX;
+    var V = G.QV4; if (!Q || !V || !V.AY || !V.L || !V.SU) return null;
+    var pst = [0], i, s, a, k = 0, c = 0, p = 1, Wd = [], Pg = [], idx = {}, as, g, tx, tk, n, j, gw, t, key;
+    for (i = 0; i < V.L.length; i++) pst.push(pst[i] + V.L[i].reduce(function (x, y) { return x + (y > 0 ? y : 0); }, 0));
+    for (s = 1; s <= V.SU.length; s++) for (a = 1; a <= V.SU[s - 1]; a++, k++) {
+      as = c; g = V.AY[k] - 1; c += V.AY[k];                 /* كلمات الآية في خط الصفحة (آخرها علامة الرقم) */
+      tx = Q[s + ":" + a]; if (!tx) continue;
+      tk = norm(tx).split(" ").filter(Boolean); n = tk.length;
+      for (j = 0; j < n; j++) {
+        gw = as + (g <= 0 ? 0 : (n === g ? j : Math.min(g - 1, Math.floor((j + .5) * g / n))));
+        while (p < V.L.length && gw >= pst[p]) p++;
+        t = tk[j]; key = sk(t);
+        Wd.push(t); Pg.push(p); (idx[key] || (idx[key] = [])).push(Wd.length - 1);
       }
-      if (!best && uniq.length === 1 && sk(Ts[s]).length >= 3) best = uniq[0];
-      if (best) break;
+    }
+    return (GX = { W: Wd, P: Pg, idx: idx });
+  }
+  /* يُرجع {pg, j}: صفحة الموضع المطابق لأول كلماتٍ نطقها القارئ، وj موضع أول كلمة منها في الكلام. وإلا null */
+  function farFind(T, stable, final) {
+    if (stable < 3) return null;
+    var X = buildIndex(); if (!X) return null;
+    var cur = (G.tjState && G.tjState.pg) || 0, hits = [], s, d, H, len, t, ord, ci, cand, m, a0, run, mx = 0, top, pages = {}, np = 0, pick = null, bd = 1e9;
+    for (s = st.j; s <= st.j + 2 && s + 3 <= st.j + stable; s++) {
+      if (bsmAt(T, s)) continue;                              /* البسملة تتكرر في المصحف، لا تُحدّد موضعًا */
+      H = T.slice(s, Math.min(st.j + stable, s + 8));
+      ord = []; for (t = 0; t < H.length; t++) if (sk(H[t]).length >= 2 && X.idx[sk(H[t])]) ord.push(t);
+      ord.sort(function (x, y) { return X.idx[sk(H[x])].length - X.idx[sk(H[y])].length; });   /* نبدأ بأندر كلمة في المصحف: أقلّ المواضع المحتملة */
+      for (ci = 0; ci < 3 && ci < ord.length; ci++) {
+        d = ord[ci]; cand = X.idx[sk(H[d])];
+        if (cand.length > 400) continue;
+        for (m = 0; m < cand.length; m++) {
+          a0 = cand[m] - d; if (a0 < 0) continue;
+          run = 0; len = 0;
+          while (run < H.length && a0 + run < X.W.length && wm(X.W[a0 + run], H[run])) { len += sk(H[run]).length; run++; }
+          if (run >= 3 && len >= 9) hits.push({ a: a0, run: run, s: s });   /* ثلاث كلمات متتالية على الأقل وبحروف كافية */
+        }
+        if (hits.length) break;
+      }
+      if (hits.length) break;
+    }
+    if (!hits.length) return null;
+    hits.forEach(function (h) { if (h.run > mx) mx = h.run; });
+    top = hits.filter(function (h) { return h.run === mx; });
+    for (m = 0; m < top.length; m++) {
+      top[m].pg = X.P[top[m].a]; top[m].pe = X.P[Math.min(X.P.length - 1, top[m].a + top[m].run - 1)];
+      if (cur && top[m].pg <= cur && cur <= top[m].pe) return null;   /* الموضع في الصفحة الحالية: يتولاه التحديد المحلي */
+      if (!pages[top[m].pg]) { pages[top[m].pg] = 1; np++; }
+    }
+    if (np > 1 && !final && mx < 8) return null;              /* عبارة مكرّرة في صفحات عدّة: ننتظر كلامًا أكثر لنتبيّن */
+    top.forEach(function (h) { var dd = Math.abs(h.pg - cur); if (dd < bd) { bd = dd; pick = h; } });
+    return pick ? { pg: pick.pg, j: pick.s } : null;
+  }
+  function farJump(T, stable, final) {
+    if (!st.on || st.wait || !G.tjFetchPage) return false;
+    var now = Date.now(); if (now - (st.farT || 0) < 1500) return false;
+    var f = farFind(T, stable, final), cur = (G.tjState && G.tjState.pg) || 0;
+    if (!f || !f.pg || f.pg === cur) return false;
+    st.farT = now; st.j = f.j; st.wait = true; st.far = true; st.peek = null; st.pos = -1;   /* نحتفظ بالكلام المنطوق ونحدّد الموضع في الصفحة الجديدة */
+    toast("↪ " + gN("انتقلتُ بك", "انتقلتُ بكِ") + " إلى صفحة " + ARD(f.pg) + " حيث " + gN("تقرأ", "تقرئين"), "ok", 2200);
+    clearTimeout(st.wt);
+    st.wt = setTimeout(function () { if (st.wait && st.on) { st.wait = false; st.far = false; toast("تعذّر فتح الصفحة. تأكد من الاتصال ثم اضغط الزر للمتابعة.", "", 6000); stop(true); } }, 15000);
+    try { G.tjFetchPage(f.pg, f.pg > cur ? 1 : -1); } catch (e) { st.wait = false; st.far = false; stop(true); }
+    return true;
+  }
+
+  /* القفل: كلمتان متتاليتان صحيحتان على الأقل تحدّدان موضع القارئ في الصفحة، أيًّا كان.
+     لا نثبّت على كلمة واحدة تشبه كلمة في الصفحة (كانت تُثبَّت في موضع خاطئ فتُكشف الآيات الأولى وتأتي الصافرة)،
+     وإن تطابق الكلام مع موضعين في الصفحة ننتظر كلامًا أكثر ليتبيّن الصحيح. */
+  function tryLock(T, stable, final) {
+    var Ts = T.slice(0, st.j + stable), best = null, s, p, r, all, mx, tops;
+    for (s = st.j; s < Math.min(Ts.length, st.j + 3); s++) {
+      all = []; mx = 0;
+      for (p = 0; p < W.length; p++) {
+        r = seq(p, Ts, s, 4); if (r.m < 2) continue;
+        all.push({ m: r.m, p: p, q: r.q, j: r.j }); if (r.m > mx) mx = r.m;
+      }
+      if (all.length) {
+        tops = all.filter(function (x) { return x.m === mx; });
+        if (tops.length > 1 && mx < 4 && !final) return false;   /* موضعان محتملان: نتريّث */
+        best = tops[0]; break;
+      }
+      /* كلمة واحدة: تُقبل فقط عند انتهاء الكلام، إن كانت طويلة وتطابق موضعًا واحدًا بدقة */
+      if (final && sk(Ts[s]).length >= 4) {
+        var one = [];
+        for (p = 0; p < W.length; p++) { r = seq(p, Ts, s, 1); if (r.m === 1 && W[p].t && sk(W[p].t) === sk(Ts[s])) one.push({ m: 1, p: p, q: r.q, j: r.j }); }
+        if (one.length === 1) { best = one[0]; break; }
+      }
     }
     if (!best) return false;
     for (p = 0; p < best.q; p++) reveal(p);   /* الكلمة المقروءة وكل ما قبلها */
@@ -357,7 +438,7 @@
       if (stable <= 0) { if (!final) peek(T); break; }
       if (st.pos < 0) {
         if (stable >= 4 && bsmAt(T, st.j) && !pageHasBsm()) { st.j += 4; continue; }
-        if (!tryLock(T, stable)) break;
+        if (!tryLock(T, stable, final)) { if (farJump(T, stable, final)) return; break; }   /* ليس في هذه الصفحة: نبحث في المصحف كله */
         if (st.pos >= W.length) return done();
         continue;
       }
@@ -418,6 +499,7 @@
         if (waited) break;
       }
       jp = findJump(T, avail);
+      if (!jp && farJump(T, stable, final)) return;   /* انتقل القارئ إلى صفحة بعيدة */
       if (jp) {
         for (a = jp.p; a < jp.q; a++) reveal(a);
         if (st.pos > st.max) st.max = st.pos;
@@ -578,14 +660,14 @@
   }
 
   function resetPage() {
-    var carry = st.wait;   /* انتقال تلقائي: لا نمسح الكلام المنطوق، فقد يكون القارئ بدأ الصفحة التالية */
+    var carry = st.wait, far = st.far; st.far = false;   /* انتقال تلقائي: لا نمسح الكلام المنطوق، فقد يكون القارئ بدأ الصفحة التالية */
     if (!carry) { st.fin = []; st.fc = []; st.itx = []; st.j = 0; }
     st.sus = ""; st.pos = -1; st.s0 = -1; st.errs = 0; st.erred = false; st.max = 0; st.rr = false; st.wait = false; st.peek = null;
     clearTimeout(st.tm); clearTimeout(st.wt);
     W = buildWords();
     if (st.on) lock();
     /* بعد الانتقال التلقائي: القارئ يكمل من أول الصفحة الجديدة، فلا حاجة لتحديد موضعه من جديد */
-    if (carry && st.on && W.length) { st.pos = 0; st.s0 = 0; }
+    if (carry && st.on && W.length && !far) { st.pos = 0; st.s0 = 0; }   /* بعد القفز لصفحة بعيدة نحدّد الموضع من كلام القارئ */
     if (st.on) prefetchNext();
     if (carry && st.on) { step(false); st.tm = setTimeout(function () { step(true, true); }, st.tmo || 700); }
   }
@@ -607,6 +689,7 @@
       toast("");
       st.tmo = 700; st.rec = en; st.on = true; setLive(true);
       resetPage(); lock();
+      setTimeout(buildIndex, 600);   /* فهرس المصحف للبحث عن الصفحة البعيدة، يُبنى بعد بدء الإصغاء فلا يؤخّره */
       var run = function () {
         if (st.itx.length) { st.itx = []; if (st.j > st.fin.length) st.j = st.fin.length; }
         en.start(onSpeech, function (e2) {
